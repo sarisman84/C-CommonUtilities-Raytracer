@@ -1,0 +1,13 @@
+// camera: px,py,px, rx,ry,rz,ux,uy,uz,fx,fy,fz
+camera 0 1.5 -3 1 0 0 0 1 0 0 0 1
+// sphere: cx,cy,cz,radius,red,green,blue
+sphere 0 -10000 0 10000 0.3 0.3 0.3
+sphere  0 1 0 1 0.7 0.7 0.7
+sphere -3 1 2 1 0.2 0.6 0.4
+sphere 4 1 3 1 0.6 0.1 0.2
+// mirror_sphere  cx,cy,cz,radius,red,green,blue
+mirror_sphere  0 6 8 6 0.7 0.7 0.7
+// directional_light dx,dy,dz,red,green,blue
+directional_light 1.5 -1 0.5 1.0 0.9 0.5
+// sky: horizon r, g, b, straight up r, g, b
+sky 0.4 0.6 0.8 0.02 0.1 0.5
