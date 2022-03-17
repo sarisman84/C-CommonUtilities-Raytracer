@@ -12,6 +12,7 @@
 #include "SkyInfo.h"
 #include "UtilityFunctions.h"
 #include <functional>
+#include <iomanip>
 
 
 class CScene
@@ -28,11 +29,10 @@ public:
 	inline Vector3<float> RandomUnitVector();
 private:
 
-	Color RecursiveRay(Vector3f& aIntersectionPoint);
+	Color RecursiveRay(Vector3f& aIntersectionPoint, int aCurrentBounce = 4);
 
 	int myWidth;
 	int myHeight;
-	int myMaxBounces;
 
 	// Add member variables to store scene here
 
@@ -48,7 +48,7 @@ private:
 
 
 
-CScene::CScene(int width, int height) : myWidth(width), myHeight(height), myMaxBounces(100) {}
+CScene::CScene(int width, int height) : myWidth(width), myHeight(height) {}
 
 void CScene::Load(const char* aFilename)
 {
@@ -76,6 +76,8 @@ void CScene::Load(const char* aFilename)
 		});
 	myCurrentSpheres;
 }
+
+int raycastCount = 0;
 
 SRGB CScene::Raytrace(int x, int y)
 {
@@ -122,12 +124,17 @@ SRGB CScene::Raytrace(int x, int y)
 		if (CommonUtilities::IntersectionSphereRay(myCurrentSpheres[i].GetCollider(), ray, intersectionPoint))
 		{
 			Color color = myCurrentSpheres[i].TracePath(intersectionPoint, ray, myCurrentSpheres, myLightSource, mySky);
-
+			raycastCount++;
 			//Slumpmässig stråle i en random riktning
 			//Result blir summan av de två colors alltså result = color + randomColor
+			Color randColor;
 
-			Color randColor = RecursiveRay(intersectionPoint);
-
+			for (int i = 0; i < 100; i++)
+			{
+				randColor += RecursiveRay(intersectionPoint);
+			}
+			
+			std::cout << "\r" << std::setw(2)  << std::setfill('0') << "Raycast checks thus far: " << std::setw(2) << raycastCount << " " << std::flush;
 			result = { color.x + randColor.x, color.y + randColor.y, color.z + randColor.z };
 		}
 	}
@@ -169,8 +176,9 @@ inline Vector3<float> CScene::RandomUnitVector() //Från Föreläsningen LA09 - Pat
 	return Vector3<float>(x, y, z);
 }
 
-Color CScene::RecursiveRay(Vector3f& aIntersectionPoint)
+Color CScene::RecursiveRay(Vector3f& aIntersectionPoint, int aCurrentBounce)
 {
+	raycastCount++;
 	Color result;
 
 	Vector3f randomDir = RandomUnitVector();
@@ -189,11 +197,9 @@ Color CScene::RecursiveRay(Vector3f& aIntersectionPoint)
 		}
 	}
 
-	--myMaxBounces;
-
-	if (myMaxBounces > 0)
+	if (aCurrentBounce >= 0)
 	{
-		Color otherResult = RecursiveRay(aIntersectionPoint);
+		Color otherResult = RecursiveRay(aIntersectionPoint , aCurrentBounce - 1);
 		result = { result.x * otherResult.x, result.y * otherResult.y, result.z * otherResult.z };
 	}
 
