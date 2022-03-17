@@ -25,10 +25,14 @@ public:
 	inline LightInfo& GetLightSource();
 	inline SkyInfo& GetSky();
 	inline Camera& GetCamera();
+	inline Vector3<float> RandomUnitVector();
 private:
+
+	Color RecursiveRay(Vector3f& aIntersectionPoint);
 
 	int myWidth;
 	int myHeight;
+	int myMaxBounces;
 
 	// Add member variables to store scene here
 
@@ -44,7 +48,7 @@ private:
 
 
 
-CScene::CScene(int width, int height) : myWidth(width), myHeight(height) {}
+CScene::CScene(int width, int height) : myWidth(width), myHeight(height), myMaxBounces(100) {}
 
 void CScene::Load(const char* aFilename)
 {
@@ -118,11 +122,13 @@ SRGB CScene::Raytrace(int x, int y)
 		if (CommonUtilities::IntersectionSphereRay(myCurrentSpheres[i].GetCollider(), ray, intersectionPoint))
 		{
 			Color color = myCurrentSpheres[i].TracePath(intersectionPoint, ray, myCurrentSpheres, myLightSource, mySky);
-			result = { color.x, color.y, color.z };
 
+			//Slumpmässig stråle i en random riktning
+			//Result blir summan av de två colors alltså result = color + randomColor
 
+			Color randColor = RecursiveRay(intersectionPoint);
 
-
+			result = { color.x + randColor.x, color.y + randColor.y, color.z + randColor.z };
 		}
 	}
 
@@ -151,4 +157,45 @@ inline SkyInfo& CScene::GetSky()
 inline Camera& CScene::GetCamera()
 {
 	return myCamera;
+}
+
+inline Vector3<float> CScene::RandomUnitVector() //Från Föreläsningen LA09 - Pathtracing (=
+{
+	float z = RandomFloat() * 2.0f - 1.0f;
+	float a = RandomFloat() * 2.0f - std::_Pi;
+	float r = sqrtf(1.0f - z * z);
+	float x = r * cosf(a);
+	float y = r * sinf(a);
+	return Vector3<float>(x, y, z);
+}
+
+Color CScene::RecursiveRay(Vector3f& aIntersectionPoint)
+{
+	Color result;
+
+	Vector3f randomDir = RandomUnitVector();
+
+	Ray<float> ray = Ray<float>(aIntersectionPoint, randomDir);
+
+	for (int i = 0; i < myCurrentSpheres.size(); i++)
+	{
+
+		//std::cout << "Sphere " << i << "at Pixel Pos(x" << x << ",y" << y << ") and at World Pos " << myCurrentSpheres[i].GetCollider().GetOrigin();
+		if (CommonUtilities::IntersectionSphereRay(myCurrentSpheres[i].GetCollider(), ray, aIntersectionPoint))
+		{
+			Color color = myCurrentSpheres[i].TracePath(aIntersectionPoint, ray, myCurrentSpheres, myLightSource, mySky);
+
+			result = { color.x, color.y, color.z };
+		}
+	}
+
+	--myMaxBounces;
+
+	if (myMaxBounces > 0)
+	{
+		Color otherResult = RecursiveRay(aIntersectionPoint);
+		result = { result.x * otherResult.x, result.y * otherResult.y, result.z * otherResult.z };
+	}
+
+	return result;
 }

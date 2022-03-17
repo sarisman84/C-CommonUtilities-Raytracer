@@ -10,7 +10,7 @@
 #include "Util.h"
 
 // Enable to run raytracing in parallel
-//#define RUN_IN_PARALLEL
+#define RUN_IN_PARALLEL
 
 int main(int argc, char* argv[])
 {
@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 
 	CScene scene(width, height);
 
-	std::string filename = "uppgift5_test.txt";
+	std::string filename = "uppgift5_scen.txt";
 	if (argc > 1)
 		filename = argv[1];
 
