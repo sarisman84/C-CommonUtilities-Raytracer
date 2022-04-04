@@ -2,11 +2,11 @@
 #include "SphereCollider.h"
 #include "Vector3.h"
 #include "Ray.h"
-
-
+#include "Material.h"
+#include <memory>
 
 using namespace CommonUtilities;
-typedef Vector3<float> Color;
+
 
 struct SkyInfo;
 struct LightInfo;
@@ -15,23 +15,30 @@ struct LightInfo;
 class Sphere
 {
 public:
-	Sphere(const Vector3<float> aCenter, const float aRadius, const Color aColor, const bool anIsSpecularFlag = false);
-	SphereCollider<float> GetCollider() const;
-	Color GetColor() const;
+	Sphere() = default;
+	Sphere(const Vector3<float> aCenter, const float aRadius, const Color aColor, const bool& anIsSpecular);
+	//Sphere(Sphere& anOther);
+	//void operator=(Sphere& anOther);
+	~Sphere();
+	SphereCollider<float>* GetCollider() const;
+	std::shared_ptr<IMaterial>& GetMaterial();
 	const bool IsSpecular() const;
-	Color TracePath(Vector3<float> anIntersectionPoint, Ray<float> aRay, std::vector<Sphere>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aRecursionDepth = 10);
+	Color TracePath(Vector3<float> anIntersectionPoint, Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aRecursionDepth = 5, const int someAmmOfAdditionalCasts = 5);
 	Vector3<float> GetNormal(Vector3<float> aSurfacePoint);
+	Vector3<float> RandomUnitVector();
 
-	inline static void ParseInformation(const char* anInput, std::vector<Sphere>& aCollection);
+
+
+	inline static void ParseInformation(const char* anInput, std::vector<Sphere*>& aCollection);
 
 private:
-	SphereCollider<float> myCollider;
-	Color myColor;
+	SphereCollider<float>* myCollider;
+	std::shared_ptr<IMaterial> myMaterial;
 	bool myIsSpecularFlag;
 };
 
 
-inline void Sphere::ParseInformation(const char* anInput, std::vector<Sphere>& aCollection)
+inline void Sphere::ParseInformation(const char* anInput, std::vector<Sphere*>& aCollection)
 {
 	const char* sphereString = "sphere";
 	const char* specularSphereString = "mirror_sphere";
@@ -62,8 +69,8 @@ inline void Sphere::ParseInformation(const char* anInput, std::vector<Sphere>& a
 			std::cout << "And it's material is Specular" << "\n";
 		std::cout << "\n";
 
-		// Add code to store the scene!
-		aCollection.push_back(Sphere({ posX, posY, posZ }, radius, { red, green, blue }, isSpecular));
+
+		aCollection.push_back(new Sphere(Vector3<float>{ posX, posY, posZ }, radius, Color(red, green, blue), isSpecular));
 
 	}
 

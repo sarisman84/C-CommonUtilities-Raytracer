@@ -37,7 +37,7 @@ namespace CommonUtilities
 			: aValue;
 	}
 
-	//Lerps between two values by a third percentage percentage value (between 0 and 1).
+	//Lerps between two values by a third percentage value (between 0 and 1).
 	template <typename T>
 	T Lerp(const T& aLhsVal, const T& aRhsVal, const float& aPercentageVal)
 	{

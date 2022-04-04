@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="SkyInfo.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Raytracer.cpp" />
@@ -148,8 +149,10 @@
   <ItemGroup>
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="CScene.h" />
     <ClInclude Include="LightSource.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="SkyInfo.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Intersection.h" />

@@ -1,12 +1,12 @@
 #pragma once
 #include "Vector3.h"
-
+#include "Color.h"
 using namespace CommonUtilities;
 
 struct SkyInfo
 {
 	SkyInfo() = default;
-	SkyInfo(const Vector3<float> aHorizonColor, const Vector3<float> aStraightUpColor)
+	SkyInfo(const Color aHorizonColor, const Color aStraightUpColor)
 	{
 		myHorizonColor = aHorizonColor;
 		myStraightUpColor = aStraightUpColor;
@@ -14,8 +14,8 @@ struct SkyInfo
 
 	static inline void ParseInformation(const char* anInput, SkyInfo& someInfo);
 
-	Vector3<float> myHorizonColor;
-	Vector3<float> myStraightUpColor;
+	Color  myHorizonColor;
+	Color myStraightUpColor;
 };
 
 
@@ -40,6 +40,6 @@ inline void SkyInfo::ParseInformation(const char* anInput, SkyInfo& someInfo)
 		std::cout << "And straight up color [" << sRed << ", " << sGreen << ", " << sBlue << "]\n";
 		std::cout << "\n";
 
-		someInfo = SkyInfo({ hRed, hGreen, hBlue }, { sRed, sGreen, sBlue });
+		someInfo = SkyInfo(Color(hRed, hGreen, hBlue), Color(sRed, sGreen, sBlue));
 	}
 }

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Color.h"
 #include "Vector3.h"
 
 using namespace CommonUtilities;
@@ -7,15 +7,15 @@ using namespace CommonUtilities;
 struct LightInfo
 {
 	LightInfo() = default;
-	LightInfo(const Vector3<float> anPosition, const Vector3<float> anColor)
-		: myDirection(anPosition), myColor(anColor)
+	LightInfo(const Vector3<float> aDirection, const Color anColor)
+		: myDirection(aDirection), myColor(anColor)
 	{
 	}
 
 	static inline void ParseInformation(const char* anInput, LightInfo& someInfo);
 
 	Vector3<float> myDirection;
-	Vector3<float> myColor;
+	Color myColor;
 
 };
 
@@ -27,19 +27,19 @@ inline void LightInfo::ParseInformation(const char* anInput, LightInfo& someInfo
 	{
 		char* remainder = nullptr;
 
-		float posX = strtof(anInput + strlen(dirLightString), &remainder);
-		float posY = strtof(remainder, &remainder);
-		float posZ = strtof(remainder, &remainder);
+		float dirX = strtof(anInput + strlen(dirLightString), &remainder);
+		float dirY = strtof(remainder, &remainder);
+		float dirZ = strtof(remainder, &remainder);
 
 		float red = strtof(remainder, &remainder);
 		float green = strtof(remainder, &remainder);
 		float blue = strtof(remainder, &remainder);
 
-		std::cout << "LightSource at position [" << posX << ", " << posY << ", " << posZ << "]\n";
+		std::cout << "LightSource at position [" << dirX << ", " << dirY << ", " << dirZ << "]\n";
 		std::cout << "and color [" << red << ", " << green << ", " << blue << "]\n";
 		std::cout << "\n";
 
-		someInfo = LightInfo({ posX, posY, posZ }, { red,green,blue });
+		someInfo = LightInfo({ dirX, dirY, dirZ }, Color(red, green, blue));
 	}
 
 

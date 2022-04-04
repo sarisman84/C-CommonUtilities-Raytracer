@@ -22,21 +22,20 @@ public:
 	void Load(const char* filename);
 	inline SRGB Raytrace(int x, int y);
 
-	inline std::vector<Sphere>& GetCurrentSpheres();
+	inline std::vector<Sphere*>& GetCurrentSpheres();
 	inline LightInfo& GetLightSource();
 	inline SkyInfo& GetSky();
 	inline Camera& GetCamera();
-	inline Vector3<float> RandomUnitVector();
 private:
 
-	Color RecursiveRay(Vector3f& aIntersectionPoint, int aCurrentBounce = 4);
+
 
 	int myWidth;
 	int myHeight;
 
 	// Add member variables to store scene here
 
-	std::vector<Sphere> myCurrentSpheres;
+	std::vector<Sphere*> myCurrentSpheres;
 	LightInfo myLightSource;
 	SkyInfo mySky;
 	Camera myCamera;
@@ -67,20 +66,20 @@ void CScene::Load(const char* aFilename)
 		SkyInfo::ParseInformation(str.c_str(), mySky);
 	}
 	Vector3f camPos = myCamera.GetPos();
-	std::sort(myCurrentSpheres.begin(), myCurrentSpheres.end(), [&](Sphere aLhs, Sphere aRhs) -> bool
+	std::sort(myCurrentSpheres.begin(), myCurrentSpheres.end(), [&](Sphere* aLhs, Sphere* aRhs) -> bool
 		{
-			float lhsDist = Abs((aLhs.GetCollider().GetOrigin() - camPos).Length() + aLhs.GetCollider().GetRadius());
-			float rhsDist = Abs((aRhs.GetCollider().GetOrigin() - camPos).Length() + aRhs.GetCollider().GetRadius());
+			float lhsDist = Abs((aLhs->GetCollider()->GetOrigin() - camPos).Length() + aLhs->GetCollider()->GetRadius());
+			float rhsDist = Abs((aRhs->GetCollider()->GetOrigin() - camPos).Length() + aRhs->GetCollider()->GetRadius());
 
 			return lhsDist > rhsDist;
 		});
-	myCurrentSpheres;
 }
 
 int raycastCount = 0;
 
 SRGB CScene::Raytrace(int x, int y)
 {
+
 	// Replace this with raytracing code!
 
 	float r = (float)x / (float)myWidth;
@@ -115,27 +114,34 @@ SRGB CScene::Raytrace(int x, int y)
 
 	Color skyColor = (1 - dir.y) * mySky.myHorizonColor + dir.y * mySky.myStraightUpColor;
 
-	result = { skyColor.x, skyColor.y, skyColor.z };
+	result = { skyColor.r, skyColor.g, skyColor.b };
+
+	Sphere* closestSphere = nullptr;
+
 
 	for (int i = 0; i < myCurrentSpheres.size(); i++)
 	{
 
+
+
+
+
+
+
+
+
 		//std::cout << "Sphere " << i << "at Pixel Pos(x" << x << ",y" << y << ") and at World Pos " << myCurrentSpheres[i].GetCollider().GetOrigin();
-		if (CommonUtilities::IntersectionSphereRay(myCurrentSpheres[i].GetCollider(), ray, intersectionPoint))
+		if (CommonUtilities::IntersectionSphereRay(*(myCurrentSpheres[i]->GetCollider()), ray, intersectionPoint))
 		{
-			Color color = myCurrentSpheres[i].TracePath(intersectionPoint, ray, myCurrentSpheres, myLightSource, mySky);
-			raycastCount++;
+
+
+			Color color = myCurrentSpheres[i]->TracePath(intersectionPoint, ray, myCurrentSpheres, myLightSource, mySky);
 			//Slumpmässig stråle i en random riktning
 			//Result blir summan av de två colors alltså result = color + randomColor
-			Color randColor;
 
-			for (int i = 0; i < 100; i++)
-			{
-				randColor += RecursiveRay(intersectionPoint);
-			}
-			
-			std::cout << "\r" << std::setw(2)  << std::setfill('0') << "Raycast checks thus far: " << std::setw(2) << raycastCount << " " << std::flush;
-			result = { color.x + randColor.x, color.y + randColor.y, color.z + randColor.z };
+			//std::cout << "\r" << std::setw(2)  << std::setfill('0') << "Raycast checks thus far: " << std::setw(2) << raycastCount << " " << std::flush;
+			auto c = color;
+			result = { c.r, c.g, c.b };
 		}
 	}
 
@@ -146,7 +152,7 @@ SRGB CScene::Raytrace(int x, int y)
 
 
 
-inline std::vector<Sphere>& CScene::GetCurrentSpheres()
+inline std::vector<Sphere*>& CScene::GetCurrentSpheres()
 {
 	return myCurrentSpheres;
 }
@@ -166,42 +172,5 @@ inline Camera& CScene::GetCamera()
 	return myCamera;
 }
 
-inline Vector3<float> CScene::RandomUnitVector() //Från Föreläsningen LA09 - Pathtracing (=
-{
-	float z = RandomFloat() * 2.0f - 1.0f;
-	float a = RandomFloat() * 2.0f - std::_Pi;
-	float r = sqrtf(1.0f - z * z);
-	float x = r * cosf(a);
-	float y = r * sinf(a);
-	return Vector3<float>(x, y, z);
-}
 
-Color CScene::RecursiveRay(Vector3f& aIntersectionPoint, int aCurrentBounce)
-{
-	raycastCount++;
-	Color result;
 
-	Vector3f randomDir = RandomUnitVector();
-
-	Ray<float> ray = Ray<float>(aIntersectionPoint, randomDir);
-
-	for (int i = 0; i < myCurrentSpheres.size(); i++)
-	{
-
-		//std::cout << "Sphere " << i << "at Pixel Pos(x" << x << ",y" << y << ") and at World Pos " << myCurrentSpheres[i].GetCollider().GetOrigin();
-		if (CommonUtilities::IntersectionSphereRay(myCurrentSpheres[i].GetCollider(), ray, aIntersectionPoint))
-		{
-			Color color = myCurrentSpheres[i].TracePath(aIntersectionPoint, ray, myCurrentSpheres, myLightSource, mySky);
-
-			result = { color.x, color.y, color.z };
-		}
-	}
-
-	if (aCurrentBounce >= 0)
-	{
-		Color otherResult = RecursiveRay(aIntersectionPoint , aCurrentBounce - 1);
-		result = { result.x * otherResult.x, result.y * otherResult.y, result.z * otherResult.z };
-	}
-
-	return result;
-}

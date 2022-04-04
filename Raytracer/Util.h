@@ -13,7 +13,7 @@ struct SRGB
 // Licensed under Apache License 2.0 (NO WARRANTY, etc. see website)
 typedef struct { uint64_t state;  uint64_t inc; } pcg32_random_t;
 #pragma warning(disable:4146)
-uint32_t pcg32_random_r(pcg32_random_t* rng)
+inline uint32_t pcg32_random_r(pcg32_random_t* rng)
 {
 	uint64_t oldstate = rng->state;
 	// Advance internal state
@@ -25,14 +25,14 @@ uint32_t pcg32_random_r(pcg32_random_t* rng)
 }
 
 // Returns a random float between 0.0 and 1.0
-float RandomFloat()
+inline float RandomFloat()
 {
 	thread_local pcg32_random_t state;
 	return (float)ldexp(pcg32_random_r(&state), -32);
 }
 
 // Convert linear rgb values to sRGB
-float LinearToSrgb(float x)
+inline float LinearToSrgb(float x)
 {
 	if (x >= 0.0031308f)
 		return (1.055f) * powf(x, (1.0f / 2.4f)) - 0.055f;
@@ -41,7 +41,7 @@ float LinearToSrgb(float x)
 }
 
 // Curve shaped to better deal with very bright colors
-float ACESFilm(float x)
+inline float ACESFilm(float x)
 {
 	float a = 2.51f;
 	float b = 0.03f;
@@ -52,7 +52,7 @@ float ACESFilm(float x)
 }
 
 // takes a linear sRGB color and does a nice looking remapping to deal with overexposed colors
-SRGB ToneMap(SRGB c)
+inline SRGB ToneMap(SRGB c)
 {
 	// S gamut cine
 	float r = c.r * 0.6456794776f + c.g * 0.2591145470f + c.b * 0.0952059754f;

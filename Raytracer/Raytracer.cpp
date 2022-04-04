@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
 	const int width = 800;
 	const int height = 600;
 
+
 	CScene scene(width, height);
 
 	std::string filename = "uppgift5_scen.txt";
@@ -39,7 +40,7 @@ int main(int argc, char* argv[])
 	{
 		for (int i = 0; i < width; ++i)
 		{
-			int index = 3 * (j*width + i);
+			int index = 3 * (j * width + i);
 
 			SRGB color = scene.Raytrace(i, height - 1 - j);
 			color = ToneMap(color);
@@ -52,10 +53,13 @@ int main(int argc, char* argv[])
 			pixels[index + 1] = ig;
 			pixels[index + 2] = ib;
 		}
+
+		
+
 #ifdef RUN_IN_PARALLEL
 	});
 #else
-	}
+}
 #endif
 
 	std::string imageFilename = filename.substr(0, filename.find_last_of('.')) + ".png";

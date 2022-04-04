@@ -1,5 +1,9 @@
 #pragma once
 #include <iostream>
+#include <random>
+
+#include "UtilityFunctions.h"
+
 namespace CommonUtilities
 {
 	template <class T>
