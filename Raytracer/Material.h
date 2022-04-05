@@ -20,9 +20,11 @@ struct SkyInfo;
 
 class IMaterial
 {
+	friend class Diffuse;
 public:
 	IMaterial(const Color& anInitialColor, Sphere* anOwner);
 	virtual Color CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtilities::Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aBounceLimit = 0) = 0;
+	inline Color GetColor() const { return myColor; }
 protected:
 	Color myColor;
 	Sphere* myOwner;
@@ -36,7 +38,7 @@ public:
 	Specular(const Color& anInitialColor, Sphere* anOwner);
 	// Inherited via IMaterial
 	virtual Color CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtilities::Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aBounceLimit = 0) override;
-	
+
 
 };
 

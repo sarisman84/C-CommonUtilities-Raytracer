@@ -15,6 +15,10 @@
 #include <iomanip>
 
 
+
+
+
+
 class CScene
 {
 public:
@@ -27,7 +31,11 @@ public:
 	inline SkyInfo& GetSky();
 	inline Camera& GetCamera();
 private:
-
+	//Fetches the closest sphere in a given ray.
+	//Returns:
+	//-A pointer to the closest sphere.
+	//-The intersection point where the ray collided with the closest sphere.
+	static std::tuple<Sphere*, Vector3<float>> GetClosestSphere(const Ray<float>& aRay, std::vector<Sphere*> someSpheres);
 
 
 	int myWidth;
@@ -127,19 +135,18 @@ SRGB CScene::Raytrace(int x, int y)
 
 
 
-
-
-
+		auto collidedSphere = GetClosestSphere(ray, myCurrentSpheres);
 		//std::cout << "Sphere " << i << "at Pixel Pos(x" << x << ",y" << y << ") and at World Pos " << myCurrentSpheres[i].GetCollider().GetOrigin();
-		if (CommonUtilities::IntersectionSphereRay(*(myCurrentSpheres[i]->GetCollider()), ray, intersectionPoint))
+		if (collidedSphere._Myfirst._Val)
 		{
 
+			int sampleAmm = 100;
+			Color color;
+			for (size_t i = 0; i < sampleAmm; i++)
+			{
+				color += collidedSphere._Myfirst._Val->TracePath(collidedSphere._Get_rest()._Myfirst._Val, ray, myCurrentSpheres, myLightSource, mySky);
+			}
 
-			Color color = myCurrentSpheres[i]->TracePath(intersectionPoint, ray, myCurrentSpheres, myLightSource, mySky);
-			//Slumpmässig stråle i en random riktning
-			//Result blir summan av de två colors alltså result = color + randomColor
-
-			//std::cout << "\r" << std::setw(2)  << std::setfill('0') << "Raycast checks thus far: " << std::setw(2) << raycastCount << " " << std::flush;
 			auto c = color;
 			result = { c.r, c.g, c.b };
 		}
@@ -170,6 +177,30 @@ inline SkyInfo& CScene::GetSky()
 inline Camera& CScene::GetCamera()
 {
 	return myCamera;
+}
+
+
+inline std::tuple<Sphere*, Vector3<float>> CScene::GetClosestSphere(const Ray<float>& aRay, std::vector<Sphere*> someSpheres)
+{
+	float dist = static_cast<float>(INT_MAX);
+	Vector3<float> intesectPoint;
+	Sphere* collidedSphere = nullptr;
+
+	for (size_t i = 0; i < someSpheres.size(); i++)
+	{
+		auto colDist = collidedSphere ? collidedSphere->GetCollider()->GetOrigin() - someSpheres[i]->GetCollider()->GetOrigin() : Vector3<float>(0, 0, 0);
+		if ((!collidedSphere || dist > colDist.Length()) && CommonUtilities::IntersectionSphereRay(*(someSpheres[i]->GetCollider()), aRay, intesectPoint))
+		{
+			dist = colDist.Length();
+			collidedSphere = someSpheres[i];
+		}
+	}
+
+
+
+
+
+	return std::tuple<Sphere*, Vector3<float>>(collidedSphere, intesectPoint);
 }
 
 

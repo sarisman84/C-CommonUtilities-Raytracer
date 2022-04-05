@@ -73,7 +73,7 @@ Vector3<float> Sphere::RandomUnitVector() //Från Föreläsningen LA09 - Pathtracin
 Color Sphere::TracePath(Vector3<float> anIntersectionPoint, Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aRecursionDepth, const int someAmmOfAdditionalCasts)
 {
 
-	auto result = myMaterial->CalculateRayColor(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aRecursionDepth);
+	auto result =/* aRecursionDepth <= 0 ? myMaterial->GetColor() :*/ myMaterial->CalculateRayColor(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aRecursionDepth);
 	if (aRecursionDepth <= 0)
 	{
 		return result;
@@ -81,16 +81,11 @@ Color Sphere::TracePath(Vector3<float> anIntersectionPoint, Ray<float> aRay, std
 
 	for (size_t i = 0; i < someAmmOfAdditionalCasts; i++)
 	{
-		aRay.InitWithOriginAndDirection(anIntersectionPoint, RandomUnitVector());
-		result += TracePath(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aRecursionDepth - 1);
-	}
-	if (someAmmOfAdditionalCasts != 0)
-	{
-		result.r /= someAmmOfAdditionalCasts;
-		result.g /= someAmmOfAdditionalCasts;
-		result.b /= someAmmOfAdditionalCasts;
+		aRay.InitWithOriginAndDirection(anIntersectionPoint, (GetNormal(anIntersectionPoint) + RandomUnitVector()).GetNormalized());
+		result = result + TracePath(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aRecursionDepth - 1);
 	}
 
+	result /= someAmmOfAdditionalCasts;
 
 	return result;
 }

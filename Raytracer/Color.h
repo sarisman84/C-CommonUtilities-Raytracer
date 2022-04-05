@@ -74,6 +74,22 @@ struct Color
 		g += someOtherColor.g;
 		b += someOtherColor.b;
 	}
+
+	inline void operator /= (const float& aValue)
+	{
+		r /= aValue;
+		g /= aValue;
+		b /= aValue;
+	}
+
+	inline Color operator / (const float& aValue)
+	{
+		r /= aValue;
+		g /= aValue;
+		b /= aValue;
+		return *this;
+	}
+
 };
 
 

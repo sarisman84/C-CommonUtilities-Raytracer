@@ -31,17 +31,17 @@ Color Specular::CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtil
 
 	Color result = skyColor * myColor;
 
-
-	for (int i = 0; i < someOtherSpheres.size(); i++)
-	{
-		if (someOtherSpheres[i] == IMaterial::myOwner) continue;
-		if (IntersectionSphereRay(*someOtherSpheres[i]->GetCollider(), aRay, anIntersectionPoint))
+	if (aBounceLimit > 0)
+		for (int i = 0; i < someOtherSpheres.size(); i++)
 		{
-			Color reflectedColor = someOtherSpheres[i]->TracePath(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, 0);
-			result = reflectedColor * myColor;
+			if (someOtherSpheres[i] == IMaterial::myOwner) continue;
+			if (IntersectionSphereRay(*someOtherSpheres[i]->GetCollider(), aRay, anIntersectionPoint))
+			{
+				Color reflectedColor = someOtherSpheres[i]->TracePath(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aBounceLimit - 1);
+				result = reflectedColor * myColor;
 
+			}
 		}
-	}
 	return result;
 }
 
@@ -62,7 +62,7 @@ Color Diffuse::CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtili
 	Color result = someLightInfo.myColor * myColor;
 
 	aRay.InitWithOriginAndDirection(anIntersectionPoint, someLightInfo.myDirection * -1.0f);
-	result *= CommonUtilities::Max(0.0f, (sphereNormal.Dot(aRay.GetDirection())));
+
 
 
 	for (auto& sphere : someOtherSpheres)
@@ -71,11 +71,12 @@ Color Diffuse::CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtili
 
 		if (IntersectionSphereRay(*sphere->GetCollider(), aRay, anIntersectionPoint))
 		{
-
-			result *= 0.1f;
+			aRay.InitWithOriginAndDirection(anIntersectionPoint, (sphere->GetNormal(anIntersectionPoint) + sphere->RandomUnitVector()).GetNormalized());
+			result *= 0.0f;
 
 		}
 	}
+	result *= CommonUtilities::Max(0.0f, (sphereNormal.Dot(aRay.GetDirection())));
 
 	return result;
 }

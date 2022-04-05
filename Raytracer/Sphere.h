@@ -23,7 +23,7 @@ public:
 	SphereCollider<float>* GetCollider() const;
 	std::shared_ptr<IMaterial>& GetMaterial();
 	const bool IsSpecular() const;
-	Color TracePath(Vector3<float> anIntersectionPoint, Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aRecursionDepth = 5, const int someAmmOfAdditionalCasts = 5);
+	Color TracePath(Vector3<float> anIntersectionPoint, Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aRecursionDepth = 3, const int someAmmOfAdditionalCasts = 100);
 	Vector3<float> GetNormal(Vector3<float> aSurfacePoint);
 	Vector3<float> RandomUnitVector();
 
