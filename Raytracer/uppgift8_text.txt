@@ -1,0 +1,17 @@
+// camera: px,py,px, rx,ry,rz,ux,uy,uz,fx,fy,fz
+camera 0 1.5 -3 1 0 0 0 1 0 0 0 1
+// sphere: cx,cy,cz,radius,red,green,blue
+sphere 0 -10000 0 10000 0.8 0.8 0.8
+sphere 0 10003 0 -10000 0.8 0.8 0.8
+sphere -10002 0 0 10000 0.8 0.2 0.2
+sphere 10002 0 0 10000 0.2 0.8 0.2
+sphere 0 0 10001 10000 0.8 0.8 0.8
+sphere 1.4 2.4 0 0.6 0.8 0.8 0.8
+sphere -1.5 2.5 0 0.5 0.8 0.8 0.8
+sphere -1.5 0.5 0.5 0.5 0.8 0.8 0.8
+sphere -1.5 0.5 -1 0.5 0.8 0.8 0.8
+// emissive_sphere  cx,cy,cz,radius,red,green,blue
+emissive_sphere  -1.25 2.25 0.5 0.5 5 4 2
+emissive_sphere  1.5 0.5 -0.5 0.5 1 2 4
+// mirror_sphere  cx,cy,cz,radius,red,green,blue
+mirror_sphere  0.4 0.75 0.25 0.75 0.95 0.95 0.95

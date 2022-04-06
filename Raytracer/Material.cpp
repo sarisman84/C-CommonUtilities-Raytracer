@@ -4,6 +4,7 @@
 #include "LightSource.h"
 #include "SkyInfo.h"
 #include "Intersection.h"
+#include "CScene.h"
 
 using namespace CommonUtilities;
 
@@ -22,26 +23,39 @@ Color Specular::CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtil
 
 	Vector3<float> reflectedDir = curDir - (2.0f * (curDir.Dot(sphereNormal) * sphereNormal));
 
-	aRay.InitWithOriginAndDirection(anIntersectionPoint, reflectedDir);
+	aRay.InitWithOriginAndDirection(anIntersectionPoint + reflectedDir * 0.01f, reflectedDir);
 
-	Vector3<float> intersectionPoint;
 
 
 	Color skyColor = (1 - aRay.GetDirection().y) * someSkyInfo.myHorizonColor + aRay.GetDirection().y * someSkyInfo.myStraightUpColor;
 
 	Color result = skyColor * myColor;
 
-	if (aBounceLimit > 0)
-		for (int i = 0; i < someOtherSpheres.size(); i++)
-		{
-			if (someOtherSpheres[i] == IMaterial::myOwner) continue;
-			if (IntersectionSphereRay(*someOtherSpheres[i]->GetCollider(), aRay, anIntersectionPoint))
-			{
-				Color reflectedColor = someOtherSpheres[i]->TracePath(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aBounceLimit - 1);
-				result = reflectedColor * myColor;
+	Vector3<float> tempPoint;
 
-			}
+	for (auto& col : someOtherSpheres)
+	{
+
+		if (col == IMaterial::myOwner) continue;
+
+		if (IntersectionSphereRay(*(col->GetCollider()), aRay, tempPoint))
+		{
+			Color reflectedColor = col->TracePath(tempPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aBounceLimit - 1);
+			result = reflectedColor * myColor;
 		}
+
+	}
+
+
+	/*auto sphere = CScene::GetClosestSphere(aRay, someOtherSpheres, IMaterial::myOwner);
+
+	if (sphere._Myfirst._Val)
+	{
+		Color reflectedColor = sphere._Myfirst._Val->TracePath(sphere._Get_rest()._Myfirst._Val, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aBounceLimit - 1);
+		result = reflectedColor * myColor;
+
+	}*/
+
 	return result;
 }
 
@@ -63,20 +77,55 @@ Color Diffuse::CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtili
 
 	aRay.InitWithOriginAndDirection(anIntersectionPoint, someLightInfo.myDirection * -1.0f);
 
-
-
-	for (auto& sphere : someOtherSpheres)
-	{
-		if (sphere == IMaterial::myOwner || !sphere->GetCollider()) continue;
-
-		if (IntersectionSphereRay(*sphere->GetCollider(), aRay, anIntersectionPoint))
-		{
-			aRay.InitWithOriginAndDirection(anIntersectionPoint, (sphere->GetNormal(anIntersectionPoint) + sphere->RandomUnitVector()).GetNormalized());
-			result *= 0.0f;
-
-		}
-	}
 	result *= CommonUtilities::Max(0.0f, (sphereNormal.Dot(aRay.GetDirection())));
 
+
+	Vector3<float> tempPoint;
+
+
+	for (auto& col : someOtherSpheres)
+	{
+
+		if (col == IMaterial::myOwner) continue;
+
+		if (IntersectionSphereRay(*(col->GetCollider()), aRay, tempPoint))
+		{
+			result *= 0.0f;
+		}
+
+	}
+
+	auto dir = (IMaterial::myOwner->GetNormal(anIntersectionPoint) + IMaterial::myOwner->RandomUnitVector()).GetNormalized();
+	aRay.InitWithOriginAndDirection(anIntersectionPoint + dir * 0.1f, dir);
+
+
+	Color skyColor = (1 - aRay.GetDirection().y) * someSkyInfo.myHorizonColor + aRay.GetDirection().y * someSkyInfo.myStraightUpColor;
+
+	auto sphere = CScene::GetClosestSphere(aRay, someOtherSpheres);
+
+	if (sphere._Myfirst._Val)
+	{
+		result += sphere._Myfirst._Val->TracePath(sphere._Get_rest()._Myfirst._Val, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aBounceLimit - 1);
+	}
+	else
+	{
+		result = skyColor * someLightInfo.myColor;
+	}
+
+
+
+
+
+
+
 	return result;
+}
+
+Emissive::Emissive(const Color& anInitialColor, Sphere* anOwner) : IMaterial(anInitialColor, anOwner)
+{
+}
+
+Color Emissive::CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtilities::Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aBounceLimit)
+{
+	return IMaterial::myColor;
 }

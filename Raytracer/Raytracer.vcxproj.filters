@@ -100,6 +100,12 @@
     <Image Include="uppgift5_test.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="uppgift8_scen.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="uppgift8_text.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="uppgift1.txt">
@@ -109,6 +115,9 @@
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="uppgift5_test.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="uppgift8_text.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

@@ -22,20 +22,23 @@
 class CScene
 {
 public:
-	CScene(int width, int height);
-	void Load(const char* filename);
+	inline CScene(int width, int height);
+	inline void Load(const char* filename);
 	inline SRGB Raytrace(int x, int y);
 
 	inline std::vector<Sphere*>& GetCurrentSpheres();
 	inline LightInfo& GetLightSource();
 	inline SkyInfo& GetSky();
 	inline Camera& GetCamera();
+
+	inline static std::tuple<Sphere*, Vector3<float>> GetClosestSphere(const Ray<float>& aRay, std::vector<Sphere*> someSpheres, Sphere* aSelf = nullptr);
+
 private:
 	//Fetches the closest sphere in a given ray.
 	//Returns:
 	//-A pointer to the closest sphere.
 	//-The intersection point where the ray collided with the closest sphere.
-	static std::tuple<Sphere*, Vector3<float>> GetClosestSphere(const Ray<float>& aRay, std::vector<Sphere*> someSpheres);
+
 
 
 	int myWidth;
@@ -73,17 +76,11 @@ void CScene::Load(const char* aFilename)
 		LightInfo::ParseInformation(str.c_str(), myLightSource);
 		SkyInfo::ParseInformation(str.c_str(), mySky);
 	}
-	Vector3f camPos = myCamera.GetPos();
-	std::sort(myCurrentSpheres.begin(), myCurrentSpheres.end(), [&](Sphere* aLhs, Sphere* aRhs) -> bool
-		{
-			float lhsDist = Abs((aLhs->GetCollider()->GetOrigin() - camPos).Length() + aLhs->GetCollider()->GetRadius());
-			float rhsDist = Abs((aRhs->GetCollider()->GetOrigin() - camPos).Length() + aRhs->GetCollider()->GetRadius());
 
-			return lhsDist > rhsDist;
-		});
+
 }
 
-int raycastCount = 0;
+static int raycastCount = 0;
 
 SRGB CScene::Raytrace(int x, int y)
 {
@@ -127,30 +124,21 @@ SRGB CScene::Raytrace(int x, int y)
 	Sphere* closestSphere = nullptr;
 
 
-	for (int i = 0; i < myCurrentSpheres.size(); i++)
+	auto collidedSphere = GetClosestSphere(ray, myCurrentSpheres);
+	//std::cout << "Sphere " << i << "at Pixel Pos(x" << x << ",y" << y << ") and at World Pos " << myCurrentSpheres[i].GetCollider().GetOrigin();
+	if (collidedSphere._Myfirst._Val)
 	{
 
-
-
-
-
-
-		auto collidedSphere = GetClosestSphere(ray, myCurrentSpheres);
-		//std::cout << "Sphere " << i << "at Pixel Pos(x" << x << ",y" << y << ") and at World Pos " << myCurrentSpheres[i].GetCollider().GetOrigin();
-		if (collidedSphere._Myfirst._Val)
+		int sampleAmm = 800;
+		Color color;
+		for (size_t i = 0; i < sampleAmm; i++)
 		{
-
-			int sampleAmm = 100;
-			Color color;
-			for (size_t i = 0; i < sampleAmm; i++)
-			{
-				color += collidedSphere._Myfirst._Val->TracePath(collidedSphere._Get_rest()._Myfirst._Val, ray, myCurrentSpheres, myLightSource, mySky);
-			}
-
-			auto c = color;
-			result = { c.r, c.g, c.b };
+			color += collidedSphere._Myfirst._Val->TracePath(collidedSphere._Get_rest()._Myfirst._Val, ray, myCurrentSpheres, myLightSource, mySky, 4);
 		}
+		color /= sampleAmm;
+		result = { color.r, color.g, color.b };
 	}
+
 
 	//If we have, use said object's color.
 
@@ -180,27 +168,32 @@ inline Camera& CScene::GetCamera()
 }
 
 
-inline std::tuple<Sphere*, Vector3<float>> CScene::GetClosestSphere(const Ray<float>& aRay, std::vector<Sphere*> someSpheres)
+inline std::tuple<Sphere*, Vector3<float>> CScene::GetClosestSphere(const Ray<float>& aRay, std::vector<Sphere*> someSpheres, Sphere* aSelf)
 {
-	float dist = static_cast<float>(INT_MAX);
-	Vector3<float> intesectPoint;
+	Vector3<float> tempPoint;
+	Vector3<float> closestPoint;
 	Sphere* collidedSphere = nullptr;
 
-	for (size_t i = 0; i < someSpheres.size(); i++)
+	for (auto& col : someSpheres)
 	{
-		auto colDist = collidedSphere ? collidedSphere->GetCollider()->GetOrigin() - someSpheres[i]->GetCollider()->GetOrigin() : Vector3<float>(0, 0, 0);
-		if ((!collidedSphere || dist > colDist.Length()) && CommonUtilities::IntersectionSphereRay(*(someSpheres[i]->GetCollider()), aRay, intesectPoint))
+		if (CommonUtilities::IntersectionSphereRay(*(col->GetCollider()), aRay, tempPoint))
 		{
-			dist = colDist.Length();
-			collidedSphere = someSpheres[i];
+			if (!collidedSphere)
+			{
+				closestPoint = tempPoint;
+				collidedSphere = col;
+			}
+			else if (Abs((tempPoint - aRay.GetOrigin()).Length()) < Abs((closestPoint - aRay.GetOrigin()).Length()))
+			{
+				closestPoint = tempPoint;
+				collidedSphere = col;
+			}
 		}
+
 	}
 
 
-
-
-
-	return std::tuple<Sphere*, Vector3<float>>(collidedSphere, intesectPoint);
+	return std::tuple<Sphere*, Vector3<float>>(collidedSphere, closestPoint);
 }
 
 

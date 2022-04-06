@@ -49,3 +49,11 @@ public:
 	Diffuse(const Color& anInitialColor, Sphere* anOwner);
 	virtual Color CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtilities::Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aBounceLimit = 0) override;
 };
+
+
+class Emissive : public IMaterial
+{
+public:
+	Emissive(const Color& anInitialColor, Sphere* anOwner);
+	virtual Color CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtilities::Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aBounceLimit = 0) override;
+};

@@ -5,14 +5,26 @@
 #include "UtilityFunctions.h"
 #include <iomanip>
 
-Sphere::Sphere(const Vector3<float> aCenter, const float aRadius, const Color aColor, const bool& anIsSpecular)
+Sphere::Sphere(const Vector3<float> aCenter, const float aRadius, const Color aColor, const MatType& aMat)
 {
 	myCollider = new SphereCollider<float>(aCenter, aRadius);
 
-	if (anIsSpecular)
-		myMaterial = std::make_shared<Specular>(aColor, this);
-	else
+
+	switch (aMat)
+	{
+	case MatType::Diffuse:
 		myMaterial = std::make_shared<Diffuse>(aColor, this);
+		break;
+	case MatType::Emissive:
+		myMaterial = std::make_shared<Emissive>(aColor, this);
+		break;
+	case MatType::Specular:
+		myMaterial = std::make_shared<Specular>(aColor, this);
+		break;
+
+	}
+
+
 
 }
 
@@ -70,24 +82,11 @@ Vector3<float> Sphere::RandomUnitVector() //Från Föreläsningen LA09 - Pathtracin
 }
 
 
-Color Sphere::TracePath(Vector3<float> anIntersectionPoint, Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aRecursionDepth, const int someAmmOfAdditionalCasts)
+Color Sphere::TracePath(Vector3<float> anIntersectionPoint, Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aRecursionDepth)
 {
+	if (aRecursionDepth < 0) return Color{};
 
-	auto result =/* aRecursionDepth <= 0 ? myMaterial->GetColor() :*/ myMaterial->CalculateRayColor(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aRecursionDepth);
-	if (aRecursionDepth <= 0)
-	{
-		return result;
-	}
-
-	for (size_t i = 0; i < someAmmOfAdditionalCasts; i++)
-	{
-		aRay.InitWithOriginAndDirection(anIntersectionPoint, (GetNormal(anIntersectionPoint) + RandomUnitVector()).GetNormalized());
-		result = result + TracePath(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aRecursionDepth - 1);
-	}
-
-	result /= someAmmOfAdditionalCasts;
-
-	return result;
+	return myMaterial->CalculateRayColor(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aRecursionDepth);;
 }
 
 Vector3<float> Sphere::GetNormal(Vector3<float> aSurfacePoint)
