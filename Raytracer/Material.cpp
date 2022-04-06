@@ -47,15 +47,6 @@ Color Specular::CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtil
 	}
 
 
-	/*auto sphere = CScene::GetClosestSphere(aRay, someOtherSpheres, IMaterial::myOwner);
-
-	if (sphere._Myfirst._Val)
-	{
-		Color reflectedColor = sphere._Myfirst._Val->TracePath(sphere._Get_rest()._Myfirst._Val, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aBounceLimit - 1);
-		result = reflectedColor * myColor;
-
-	}*/
-
 	return result;
 }
 
@@ -109,7 +100,7 @@ Color Diffuse::CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtili
 	}
 	else
 	{
-		result = skyColor * someLightInfo.myColor;
+		result += skyColor * someLightInfo.myColor;
 	}
 
 

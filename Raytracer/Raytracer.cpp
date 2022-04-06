@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 
 	CScene scene(width, height);
 
-	std::string filename = "uppgift8_text.txt";
+	std::string filename = "uppgift5_scen.txt";
 	if (argc > 1)
 		filename = argv[1];
 
