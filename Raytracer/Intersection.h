@@ -23,7 +23,6 @@ namespace CommonUtilities
 			return true;
 		}
 
-	
 		T normalDotProd = aRay.GetDirection().Dot(aPlane.GetNormal());
 		T pointDotProd = aRay.GetOrigin().Dot(aPlane.GetNormal());
 
@@ -38,17 +37,9 @@ namespace CommonUtilities
 
 
 	// If the ray intersects the AABB, true is returned, if not, false is returned.
-	// Any ray starting on the inside is considered to intersect the AABB
 	template<typename T>
 	bool IntersectionAABBRay(const AABB3D<T>& aAABB, const Ray<T>& aRay, Vector3<T>& aOutIntersectionPoint)
 	{
-		if (aAABB.IsInside(aRay.GetOrigin()))
-		{
-			aOutIntersectionPoint = aRay.GetOrigin();
-
-			return true;
-		}
-
 		Vector3<T> a = GetClosestPoint(&aAABB, aRay);
 
 		if (!aAABB.IsInside(a)) return false;
@@ -69,76 +60,31 @@ namespace CommonUtilities
 
 
 	// If the ray intersects the sphere, true is returned, if not, false is returned.
-	// Any ray starting on the inside is considered to intersect the sphere
 	template<typename T>
 	bool IntersectionSphereRay(const SphereCollider<T>& aSphere, const Ray<T>& aRay, Vector3<T>& aOutIntersectionPoint)
 	{
-		/*
-		1. Hitta punkten på strålen som är närmast  sfären/cirkeln
-			-Projicera (aSphere.myOrigin - aRay.myOrigin) på aRay.myDirection för att hitta a.
-		2. Kolla om a är i sfären/cirkeln
-		3. If yes: hitta skärningspunkten, b.
-			-Pythagoras sats Abs(ca)^2 + Abs(ab)^2 = r^2
-			-Abs(ab) = +- sqrt(r^2 - abs(ca)^2
-			-Hitta sen b med a, abs(ab) och d.
+		Vector3<T> dir = (aSphere.GetOrigin() - aRay.GetOrigin());
+		T dirDot = dir.Dot(aRay.GetDirection().GetNormalized());;
 
-		*/
-
-		if (aSphere.IsInside(aRay.GetOrigin()))
-		{
-
-			aOutIntersectionPoint = aRay.GetOrigin();
-			return true;
-		}
-
+		if (!aSphere.IsInside(aRay.GetOrigin() + aRay.GetDirection().GetNormalized() * dirDot)) return false;
 		
-		Vector3<T> dirToSphere = (aSphere.GetOrigin() - aRay.GetOrigin());
-		
+		T rayDist = dirDot - std::sqrt(aSphere.GetRadius() * aSphere.GetRadius() - dir.LengthSqr() + dirDot * dirDot);
 	
+		if (rayDist < 0) return false;
 
-		T directionProd = aRay.GetDirection().Dot(dirToSphere.GetNormalized());
-
-		//std::cout << "- Direction Prod: " << directionProd << std::endl;
-
-		if (directionProd <= 0) return false;
-
-		
-		Vector3<T> a = GetClosestPoint(&aSphere, aRay);
-
-
-		if (!aSphere.IsInside(a)) return false;
-
-		T caAbsLength = CommonUtilities::Abs((aSphere.GetOrigin() - a).LengthSqr());
-
-		T aToBLength = sqrt((aSphere.GetRadius() * aSphere.GetRadius()) - caAbsLength);
-
-		Vector3<T> dir = aRay.GetDirection();
-
-		Vector3<T> ab = dir * aToBLength;
-
-		aOutIntersectionPoint = a - ab;
-
-
+		aOutIntersectionPoint = aRay.GetOrigin() + aRay.GetDirection().GetNormalized() * rayDist;
 
 		return true;
 
-		// Big brain time
 	}
 
 	template< typename T>
 	Vector3<T> GetClosestPoint(const Object<T>* anObject, const Ray<T>& aRay)
 	{
-		/* Very good math
-		v = p.dir;
-		u = c.o - p.o;
-
-		a = (u * (v^2)) / v.LengthSqr
-		*/
 
 		Vector3<T> objRayDif = (anObject->GetOrigin() - aRay.GetOrigin());
 		Vector3<T> dir = aRay.GetDirection();
 		//Vector3<T> dirSquared = dir * dir;
-
 
 		Vector3<T> closestPoint = aRay.GetOrigin() + dir * (objRayDif.Dot(dir));
 		return closestPoint;

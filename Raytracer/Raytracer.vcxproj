@@ -172,13 +172,12 @@
     <Image Include="uppgift5_scen.png" />
     <Image Include="uppgift5_test.png" />
     <Image Include="uppgift8_scen.png" />
-    <Image Include="uppgift8_text.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="uppgift1.txt" />
     <Text Include="uppgift5_scen.txt" />
     <Text Include="uppgift5_test.txt" />
-    <Text Include="uppgift8_text.txt" />
+    <Text Include="uppgift8_scen.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -16,7 +16,11 @@
 
 
 
-
+struct Result
+{
+	Sphere* mySphere;
+	Vector3<float> myIntersectionPoint;
+};
 
 
 class CScene
@@ -31,7 +35,7 @@ public:
 	inline SkyInfo& GetSky();
 	inline Camera& GetCamera();
 
-	inline static std::tuple<Sphere*, Vector3<float>> GetClosestSphere(const Ray<float>& aRay, std::vector<Sphere*> someSpheres, Sphere* aSelf = nullptr);
+	inline static Result GetClosestSphere(const Ray<float>& aRay, std::vector<Sphere*> someSpheres, Sphere* aSelf = nullptr);
 
 private:
 	//Fetches the closest sphere in a given ray.
@@ -126,14 +130,14 @@ SRGB CScene::Raytrace(int x, int y)
 
 	auto collidedSphere = GetClosestSphere(ray, myCurrentSpheres);
 	//std::cout << "Sphere " << i << "at Pixel Pos(x" << x << ",y" << y << ") and at World Pos " << myCurrentSpheres[i].GetCollider().GetOrigin();
-	if (collidedSphere._Myfirst._Val)
+	if (collidedSphere.mySphere)
 	{
 
 		int sampleAmm = 800;
 		Color color;
 		for (size_t i = 0; i < sampleAmm; i++)
 		{
-			color += collidedSphere._Myfirst._Val->TracePath(collidedSphere._Get_rest()._Myfirst._Val, ray, myCurrentSpheres, myLightSource, mySky, 4);
+			color += collidedSphere.mySphere->TracePath(collidedSphere.myIntersectionPoint, ray, myCurrentSpheres, myLightSource, mySky, 5);
 		}
 		color /= sampleAmm;
 		result = { color.r, color.g, color.b };
@@ -168,7 +172,7 @@ inline Camera& CScene::GetCamera()
 }
 
 
-inline std::tuple<Sphere*, Vector3<float>> CScene::GetClosestSphere(const Ray<float>& aRay, std::vector<Sphere*> someSpheres, Sphere* aSelf)
+inline Result CScene::GetClosestSphere(const Ray<float>& aRay, std::vector<Sphere*> someSpheres, Sphere* aSelf)
 {
 	Vector3<float> tempPoint;
 	Vector3<float> closestPoint;
@@ -183,7 +187,7 @@ inline std::tuple<Sphere*, Vector3<float>> CScene::GetClosestSphere(const Ray<fl
 				closestPoint = tempPoint;
 				collidedSphere = col;
 			}
-			else if (Abs((tempPoint - aRay.GetOrigin()).Length()) < Abs((closestPoint - aRay.GetOrigin()).Length()))
+			else if ((tempPoint - aRay.GetOrigin()).Length() <= (closestPoint - aRay.GetOrigin()).Length())
 			{
 				closestPoint = tempPoint;
 				collidedSphere = col;
@@ -193,7 +197,7 @@ inline std::tuple<Sphere*, Vector3<float>> CScene::GetClosestSphere(const Ray<fl
 	}
 
 
-	return std::tuple<Sphere*, Vector3<float>>(collidedSphere, closestPoint);
+	return Result{ collidedSphere, closestPoint };
 }
 
 

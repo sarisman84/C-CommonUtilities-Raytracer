@@ -23,29 +23,27 @@ Color Specular::CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtil
 
 	Vector3<float> reflectedDir = curDir - (2.0f * (curDir.Dot(sphereNormal) * sphereNormal));
 
-	aRay.InitWithOriginAndDirection(anIntersectionPoint + reflectedDir * 0.01f, reflectedDir);
+	aRay.InitWithOriginAndDirection(anIntersectionPoint, reflectedDir);
 
 
 
 	Color skyColor = (1 - aRay.GetDirection().y) * someSkyInfo.myHorizonColor + aRay.GetDirection().y * someSkyInfo.myStraightUpColor;
 
-	Color result = skyColor * myColor;
+	Color result;
 
 	Vector3<float> tempPoint;
 
-	for (auto& col : someOtherSpheres)
+
+	auto sphere = CScene::GetClosestSphere(aRay, someOtherSpheres);
+
+	if (sphere.mySphere)
 	{
-
-		if (col == IMaterial::myOwner) continue;
-
-		if (IntersectionSphereRay(*(col->GetCollider()), aRay, tempPoint))
-		{
-			Color reflectedColor = col->TracePath(tempPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aBounceLimit - 1);
-			result = reflectedColor * myColor;
-		}
-
+		result = sphere.mySphere->TracePath(sphere.myIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aBounceLimit - 1) * myColor;
 	}
-
+	else
+	{
+		result = someLightInfo.myColor * skyColor;
+	}
 
 	return result;
 }
@@ -87,25 +85,23 @@ Color Diffuse::CalculateRayColor(Vector3<float> anIntersectionPoint, CommonUtili
 	}
 
 	auto dir = (IMaterial::myOwner->GetNormal(anIntersectionPoint) + IMaterial::myOwner->RandomUnitVector()).GetNormalized();
-	aRay.InitWithOriginAndDirection(anIntersectionPoint + dir * 0.1f, dir);
+	aRay.InitWithOriginAndDirection(anIntersectionPoint, dir);
 
 
 	Color skyColor = (1 - aRay.GetDirection().y) * someSkyInfo.myHorizonColor + aRay.GetDirection().y * someSkyInfo.myStraightUpColor;
 
 	auto sphere = CScene::GetClosestSphere(aRay, someOtherSpheres);
 
-	if (sphere._Myfirst._Val)
+	if (sphere.mySphere)
 	{
-		result += sphere._Myfirst._Val->TracePath(sphere._Get_rest()._Myfirst._Val, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aBounceLimit - 1);
+		result += sphere.mySphere->TracePath(sphere.myIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aBounceLimit - 1) * myColor;
 	}
 	else
 	{
-		result += skyColor * someLightInfo.myColor;
+		result += someLightInfo.myColor * skyColor;
 	}
 
-
-
-
+	
 
 
 

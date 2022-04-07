@@ -74,7 +74,7 @@ const bool Sphere::IsSpecular() const
 Vector3<float> Sphere::RandomUnitVector() //Från Föreläsningen LA09 - Pathtracing (=
 {
 	float z = RandomFloat() * 2.0f - 1.0f;
-	float a = RandomFloat() * 2.0f - std::_Pi;
+	float a = RandomFloat() * 2.0f * std::_Pi;
 	float r = sqrtf(1.0f - z * z);
 	float x = r * cosf(a);
 	float y = r * sinf(a);
@@ -84,9 +84,9 @@ Vector3<float> Sphere::RandomUnitVector() //Från Föreläsningen LA09 - Pathtracin
 
 Color Sphere::TracePath(Vector3<float> anIntersectionPoint, Ray<float> aRay, std::vector<Sphere*>& someOtherSpheres, LightInfo someLightInfo, SkyInfo someSkyInfo, const int aRecursionDepth)
 {
-	if (aRecursionDepth < 0) return Color{};
+	if (aRecursionDepth < 0) return someLightInfo.myColor * myMaterial->GetColor();
 
-	return myMaterial->CalculateRayColor(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aRecursionDepth);;
+	return myMaterial->CalculateRayColor(anIntersectionPoint, aRay, someOtherSpheres, someLightInfo, someSkyInfo, aRecursionDepth);
 }
 
 Vector3<float> Sphere::GetNormal(Vector3<float> aSurfacePoint)

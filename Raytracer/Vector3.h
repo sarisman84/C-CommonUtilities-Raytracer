@@ -128,6 +128,18 @@ namespace CommonUtilities
 			return Vector3<T>(x, y, z);
 		}
 
+
+
+		bool operator<(Vector3<T> anOtherVec)
+		{
+			return x < anOtherVec.x&& y < anOtherVec.y&& z < anOtherVec.z;
+		}
+
+		bool operator>(Vector3<T> anOtherVec)
+		{
+			return x > anOtherVec.x && y > anOtherVec.y && z > anOtherVec.z;
+		}
+
 	};
 
 	template <class T>
